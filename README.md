@@ -4,4 +4,4 @@ High-level script to convert audio files between formats, introduction to audio 
 Main library used: pydub (https://pypi.org/project/pydub/)
 
 If pydub cannot find the specified file, run the following command:
-conda install -c conda-forge ffmpeg
+`conda install -c conda-forge ffmpeg`
