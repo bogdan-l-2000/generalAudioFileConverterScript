@@ -52,9 +52,6 @@ msg_queue = {}
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 5)
     # source: https://pymotw.com/3/socket/tcp.html
-    # print(readable)
-    # print(writable)
-    # print(exceptional)
     for read_from in readable:
         # Source: https://steelkiwi.com/blog/working-tcp-sockets/
         if read_from is sock:
