@@ -19,6 +19,8 @@ class SocketData:
     content: str
     content_bytes: bytes
     read_complete: bool
+    write_complete: bool
+    output_file = io.BytesIO
     to_send: bytes
     bytes_sent: int
 
@@ -29,6 +31,7 @@ class SocketData:
         self.content = ''
         self.content_bytes = b''
         self.read_complete = False
+        self.write_complete = False
         self.to_send = b''
         self.bytes_sent = 0
 
@@ -66,12 +69,10 @@ while inputs:
             inputs.append(connection)
             msg_queue[connection] = SocketData()
             # source: https://steelkiwi.com/blog/working-tcp-sockets/
-            # print(inputs)
         else:
-            # print("READ COMPLETE: " + str(msg_queue[read_from].read_complete))
             if not msg_queue[read_from].read_complete:
                 try:
-                    print("waiting...")
+                    # print("waiting...")
                     data = read_from.recv(16)
 
                     msg_queue[read_from].content_bytes += data
@@ -89,12 +90,28 @@ while inputs:
                         received_file = io.BytesIO(old_file_content)
                         audio = pydub.AudioSegment.from_file(received_file,
                                                              format="m4a")
-                        audio.export("NEW_FILE_NAME.wav", format='wav')
+                        # audio.export("NEW_FILE_NAME.wav", format='wav')
+                        msg_queue[read_from].output_file = io.BytesIO()
+                        msg_queue[read_from].output_file = audio.export(msg_queue[read_from].output_file, 'wav')
+                        msg_queue[read_from].output_file.seek(0)
+
                 finally:
                     pass
 
     for write_to in writable:
-        pass
+        if not msg_queue[write_to].write_complete:
+            try:
+                # print("sending...")
+                msg_queue[write_to].to_send = msg_queue[write_to].output_file.read(16)
+                # print(msg_queue[write_to].to_send)
+                write_to.send(msg_queue[write_to].to_send)
+                msg_queue[write_to].bytes_sent += 16
+
+                if not msg_queue[write_to].to_send:
+                    msg_queue[write_to].write_complete = True
+                    write_to.send(b"\r\nEOF\r\n\r\n")
+            finally:
+                pass
 
     for s in exceptional:
         inputs.remove(s)
