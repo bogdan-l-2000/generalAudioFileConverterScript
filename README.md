@@ -8,6 +8,6 @@ If pydub cannot find the specified file, run the following command:
 
 
 In the process of creating a server that converts files and sends the converted files to clients, along with a sample client for the server.
-Currently, the server is able to convert the client's file from an `.m4a` to a `.wav` format and saves the file in the server's local directory. 
+Currently, the server is able to convert the client's file from an `.m4a` to a `.wav` format and sends the updated file content to the client. 
 
-Next steps are to send the updated file content back to the client.
+Next step in the process is generalizing converting file format types (output will still be a `.wav` most likely). 
