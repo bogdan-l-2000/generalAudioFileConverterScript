@@ -84,13 +84,15 @@ while inputs:
                         inputs.remove(read_from)
                         request_list = msg_queue[read_from].content_bytes.split(b"\r\n")
 
+                        file_format = request_list[3][-3:].decode('utf-8')
+
                         content_index = request_list.index(b"CONTENT")
                         old_file_content = b"\r\n".join(request_list[content_index+1:-3])
 
                         received_file = io.BytesIO(old_file_content)
                         audio = pydub.AudioSegment.from_file(received_file,
-                                                             format="m4a")
-                        # audio.export("NEW_FILE_NAME.wav", format='wav')
+                                                             format=file_format)
+
                         msg_queue[read_from].output_file = io.BytesIO()
                         msg_queue[read_from].output_file = audio.export(msg_queue[read_from].output_file, 'wav')
                         msg_queue[read_from].output_file.seek(0)
@@ -110,6 +112,7 @@ while inputs:
                 if not msg_queue[write_to].to_send:
                     msg_queue[write_to].write_complete = True
                     write_to.send(b"\r\nEOF\r\n\r\n")
+                    print("Finished Sending!")
             finally:
                 pass
 
